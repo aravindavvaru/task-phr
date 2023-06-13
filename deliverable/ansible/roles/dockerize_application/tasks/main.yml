@@ -1,0 +1,62 @@
+---
+# tasks file for dockerize_application
+- name: configure, install docker
+  block:
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu jammy stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+
+    - name: Install Docker Module for Python
+      pip:
+        name: docker
+
+- name: configure docker login
+  block:
+    - name: create .docker directory
+      ansible.builtin.file:
+        path: ~/.docker
+        state: directory
+    - name: adding the config auth file
+      ansible.builtin.copy:
+        dest: ~/.docker/config.json
+        src: config.json
+
+- name: copy the application directory for docker build
+  block:
+    - name: create folder for application
+      ansible.builtin.file:
+        path: ~/application
+        state: directory
+
+    - name: copy the application files
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: ~/application
+      with_fileglob:
+        - "../application/*"
+
+    - name: build the docker application
+      community.general.docker_image:
+        name: phrase
+        build:
+          path: ~/application
+        source: build
+
+    - name: Tag and push to docker hub
+      community.general.docker_image:
+        name: phrase
+        repository: aravindavvaru/phrase
+        push: true
+        source: local

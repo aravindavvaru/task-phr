@@ -1,0 +1,39 @@
+---
+- name: Adding phrase admin user
+  ansible.builtin.user:
+    name: phrase_admin
+
+- name: Adding phrase admin user with sudo permissions
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/phrase-admin-sudo"
+    content: "phrase_admin ALL=(ALL) NOPASSWD:ALL"
+
+- name: Adding phrase users
+  ansible.builtin.user:
+    name: phrase_user
+
+- name: Adding Phrase_admin and Phrase_user authorized key
+  ansible.posix.authorized_key:
+    user: "{{ item.name }}"
+    state: present
+    key: "{{ item.key }}"
+  with_items:
+    - name: phrase_admin
+      key: "{{ lookup('file', 'phrase_admin.pub') }}"
+    - name: phrase_user
+      key: "{{ lookup('file', 'phrase_user.pub') }}"
+
+- name: Install a list of packages
+  ansible.builtin.apt:
+    pkg:
+      - jq
+      - curl
+      - vim
+      - apt-transport-https
+      - ca-certificates
+      - software-properties-common
+      - python3-pip
+      - virtualenv
+      - python3-setuptools
+    state: latest
+    update_cache: true

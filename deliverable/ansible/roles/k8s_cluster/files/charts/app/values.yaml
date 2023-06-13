@@ -1,0 +1,13 @@
+app:
+  phraseApp:
+    image:
+      repository: aravindavvaru/phrase
+      tag: latest
+  replicas: 2
+kubernetesClusterDomain: cluster.local
+phrase:
+  ports:
+    - name: web
+      port: 5000
+      targetPort: 5000
+  type: LoadBalancer

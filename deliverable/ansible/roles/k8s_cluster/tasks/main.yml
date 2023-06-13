@@ -1,0 +1,68 @@
+---
+- name: Copy the bootstrap and k8s config
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /tmp
+  with_items:
+    - config.yaml
+    - cluster.sh
+
+- name: Kind Cluster Up (Takes couple of minutes)
+  ansible.builtin.shell: sh /tmp/cluster.sh > /tmp/script_output.log
+  ignore_errors: true
+
+- name: add Kubernetes apt-key
+  ansible.builtin.apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: add Kubernetes' APT repository
+  ansible.builtin.apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+    filename: "kubernetes"
+
+- name: install Kubectl
+  ansible.builtin.apt:
+    name: kubectl
+    state: present
+
+- name: Install helm if not exists
+  unarchive:
+    src: https://get.helm.sh/helm-v3.11.0-linux-amd64.tar.gz
+    dest: /usr/local/bin
+    extra_opts: "--strip-components=1"
+    owner: root
+    group: root
+    mode: 0755
+    remote_src: true
+  args:
+    creates: /usr/local/bin/helm
+
+- name: create kubernetes folder
+  ansible.builtin.file:
+    path: /tmp/kubernetes
+    state: directory
+
+- name: Copy charts to remote host
+  ansible.builtin.copy:
+    src: charts
+    dest: /tmp/kubernetes
+
+- name: Deploy app
+  kubernetes.core.helm:
+    name: app
+    chart_ref: /tmp/kubernetes/charts/app
+    release_namespace: default
+
+- name: Deploy postgres
+  kubernetes.core.helm:
+    name: postgres
+    chart_ref: /tmp/kubernetes/charts/postgres
+    release_namespace: default
+
+- name: Deploy redis
+  kubernetes.core.helm:
+    name: redis
+    chart_ref: /tmp/kubernetes/charts/redis
+    release_namespace: default

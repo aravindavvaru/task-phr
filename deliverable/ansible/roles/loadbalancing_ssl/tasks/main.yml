@@ -1,0 +1,17 @@
+---
+# tasks file for loadbalancing_ssl
+- name: Copy the ingress files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /tmp
+  with_items:
+    - ingress.sh
+    - ingress.yml
+
+- name: check if kind file exists
+  ansible.builtin.shell: kind get clusters
+  register: kind_cluster_check
+
+- name: Deploy Ingress
+  ansible.builtin.shell: sh /tmp/ingress.sh > /tmp/ingress_output.log
+  when: kind_cluster_check is defined

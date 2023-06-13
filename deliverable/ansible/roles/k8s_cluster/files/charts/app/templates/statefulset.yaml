@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: app
+  labels:
+  {{- include "app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.app.replicas }}
+  selector:
+    matchLabels:
+      app: phrase
+  serviceName: phrase-svc
+  template:
+    metadata:
+      labels:
+        app: phrase
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.app.phraseApp.image.repository }}:{{ .Values.app.phraseApp.image.tag
+          | default .Chart.AppVersion }}
+        name: phrase-app
+        ports:
+        - containerPort: 5000
+          name: web
+        resources: {}
+  updateStrategy: {}
