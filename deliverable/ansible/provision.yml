@@ -1,8 +1,9 @@
 ---
 - name: Playbook for provisioning the server
   hosts: all
+  become: yes
   roles:
-  - common
-  - dockerize_application
-  - k8s_cluster
+  # - common
+  # - dockerize_application
+  # - k8s_cluster
   - loadbalancing_ssl

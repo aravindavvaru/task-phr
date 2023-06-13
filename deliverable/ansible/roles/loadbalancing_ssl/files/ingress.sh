@@ -8,4 +8,3 @@ kubectl wait --namespace ingress-nginx \
   --timeout=90s
 
 kubectl apply -f /tmp/ingress.yml
-

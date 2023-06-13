@@ -23,6 +23,7 @@ destroy:
 collections:
 	ansible-galaxy collection install community.docker
 	ansible-galaxy collection install ansible.posix
+	ansible-galaxy install ome.ssl_certificate
 
 
 
