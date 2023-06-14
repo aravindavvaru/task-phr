@@ -18,7 +18,7 @@
 - ansible for configuring the server
     - roles to configure each task
         - common, dockerize_application, k8s_cluster, loadbalancing_ssl
-
+```
         ├── common
     │   ├── files
     │   │   ├── phrase_admin.pub
@@ -77,7 +77,7 @@
         │   └── main.yml
         └── vars
             └── main.yml
-
+```
 ### Loadbalancing and SSL
 * Place the containers behind load balancer and balance traffic between them 
 * Everything should be available via HTTPS, HTTP should be automatically redirected to the HTTPS. Use self-signed or let's encrypt SSL certificate. (reverse_proxy)
